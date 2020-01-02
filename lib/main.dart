@@ -27,7 +27,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    flutterTts.setLanguage("en-US");
+    flutterTts.setLanguage("de-DE");
 
     return Scaffold(
       body: Center(
@@ -44,16 +44,13 @@ class _MyHomePageState extends State<MyHomePage> {
       onError: (error) => print("Error: ${error.toString()}"),
     );
 
-//    var languages = await speech.locales();
-//    print("Locales available: $languages");
-    print("Available: $available");
     if (available) {
       speech.listen(
         onResult: (result) {
-          print("Recognized Words: ${result.recognizedWords}");
-          flutterTts.speak(result.recognizedWords);
+          if(result.finalResult == true) flutterTts.speak(result.recognizedWords);
         },
         listenFor: Duration(seconds: 5),
+        localeId: "de_AT",
       );
     } else {
       print("The user has denied the use of speech recognition.");
