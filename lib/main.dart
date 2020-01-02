@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
-import 'package:speech_recognition/speech_recognition.dart';
+import 'package:speech_to_text/speech_to_text.dart' as stt;
 
 void main() => runApp(MyApp());
 
@@ -22,12 +22,10 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
   FlutterTts flutterTts = new FlutterTts();
 
   void _incrementCounter() {
     setState(() {
-      _counter++;
       listen();
     });
   }
@@ -41,45 +39,34 @@ class _MyHomePageState extends State<MyHomePage> {
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-          ],
+          children: <Widget>[],
         ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _incrementCounter,
         tooltip: 'Increment',
         child: Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+      ),
     );
   }
 
-  Future speak(int number) async{
-    var result = await flutterTts.speak(number.toString());
-  }
-
-  listen() {
-    bool _speechRecognitionAvailable;
-    String _currentLocale;
-    bool _isListening;
-    String transcription;
+  listen() async {
     flutterTts.setLanguage("en-US");
 
-    SpeechRecognition _speech = new SpeechRecognition();
-    _speech.setAvailabilityHandler((bool result)
-    => setState(() => _speechRecognitionAvailable = result));
-    _speech.setRecognitionStartedHandler(()
-    => setState(() => _isListening = true));
-    _speech.setRecognitionResultHandler((String text)
-    => setState(() =>  transcription = text));
-    _speech.setRecognitionCompleteHandler(()
-    => setState(() => _isListening = false));
-
-    _speech
-        .activate()
-        .then((res) => setState(() => _speechRecognitionAvailable = res));
-
-    _speech.listen(locale: "en-US").then((result) =>
-        flutterTts.speak(result));
-
+    stt.SpeechToText speech = stt.SpeechToText();
+    bool available = await speech.initialize(
+      onStatus: (status) => print("Status: $status"),
+      onError: (error) => print("Error: ${error.toString}"),
+    );
+    if (available) {
+      speech.listen(onResult: (result) {
+        print(result.finalResult);
+        print(result.recognizedWords);
+        print(result.toString());
+        flutterTts.speak(result.recognizedWords);
+      });
+    } else {
+      print("The user has denied the use of speech recognition.");
+    }
   }
 }
