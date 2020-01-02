@@ -56,13 +56,13 @@ class _MyHomePageState extends State<MyHomePage> {
     stt.SpeechToText speech = stt.SpeechToText();
     bool available = await speech.initialize(
       onStatus: (status) => print("Status: $status"),
-      onError: (error) => print("Error: ${error.toString}"),
+      onError: (error) => print("Error: ${error.toString()}"),
     );
+    print("After Initialized");
+    print("Available: $available");
     if (available) {
       speech.listen(onResult: (result) {
-        print(result.finalResult);
-        print(result.recognizedWords);
-        print(result.toString());
+        print("Recognized Words: ${result.recognizedWords}");
         flutterTts.speak(result.recognizedWords);
       });
     } else {
