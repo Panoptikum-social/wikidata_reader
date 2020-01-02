@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
-import 'package:speech_to_text/speech_to_text.dart' as stt;
+import 'package:speech_to_text/speech_to_text.dart';
 
 void main() => runApp(MyApp());
 
@@ -9,62 +9,52 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Flutter Demo',
-      home: MyHomePage(title: 'Wikidata Reader'),
+      home: MyHomePage(),
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
-  MyHomePage({Key key, this.title}) : super(key: key);
-  final String title;
+  MyHomePage({Key key}) : super(key: key);
+
   @override
   _MyHomePageState createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends State<MyHomePage> {
   FlutterTts flutterTts = new FlutterTts();
-
-  void _incrementCounter() {
-    setState(() {
-      listen();
-    });
-  }
+  SpeechToText speech = SpeechToText();
 
   @override
   Widget build(BuildContext context) {
+    flutterTts.setLanguage("en-US");
+
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title),
-      ),
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[],
+        child: RaisedButton(
+          onPressed: listen,
+          child: Text("Listen"),
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: Icon(Icons.add),
       ),
     );
   }
 
   listen() async {
-    flutterTts.setLanguage("en-US");
-
-    stt.SpeechToText speech = stt.SpeechToText();
     bool available = await speech.initialize(
-      onStatus: (status) => print("Status: $status"),
       onError: (error) => print("Error: ${error.toString()}"),
     );
-    print("After Initialized");
+
+//    var languages = await speech.locales();
+//    print("Locales available: $languages");
     print("Available: $available");
     if (available) {
-      speech.listen(onResult: (result) {
-        print("Recognized Words: ${result.recognizedWords}");
-        flutterTts.speak(result.recognizedWords);
-      });
+      speech.listen(
+        onResult: (result) {
+          print("Recognized Words: ${result.recognizedWords}");
+          flutterTts.speak(result.recognizedWords);
+        },
+        listenFor: Duration(seconds: 5),
+      );
     } else {
       print("The user has denied the use of speech recognition.");
     }
